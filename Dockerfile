@@ -1,3 +1,4 @@
+# Gebruik de officiële PHP 8.2 FPM image als basis
 FROM php:8.2-fpm
 
 ARG BOOKMARKLY_VERSION=1.0
@@ -43,9 +44,9 @@ RUN echo "session.auto_start = 0\n\
 session.use_strict_mode = 1\n\
 session.use_cookies = 1\n\
 session.use_only_cookies = 1\n\
-session.cookie_secure = 1\n\
+session.cookie_secure = 0\n\
 session.cookie_httponly = 1\n\
-session.cookie_samesite = 'Strict'\n\
+session.cookie_samesite = 'Lax'\n\
 session.gc_maxlifetime = 3600\n\
 session.sid_length = 48\n\
 session.sid_bits_per_character = 6\n\
