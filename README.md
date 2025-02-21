@@ -7,7 +7,7 @@ docker pull ghcr.io/r0gger/bookmarkly
 ```
 services:
   bookmarkly:
-    image: ghcr.io/r0gger/bookmarkly:${BOOKMARKLY_VERSION:-latest}
+    image: ghcr.io/r0gger/bookmarkly:main
     ports:
       - "80:80"
     volumes:
@@ -23,5 +23,5 @@ services:
       start_period: 10s
 
 volumes:
-  bookmarkly_data:  
+  bookmarkly_data: 
 ```
