@@ -1,13 +1,13 @@
 # bookmarkly
 
 ```bash
-docker pull ghcr.io/r0gger/bookmarkly:main
+docker pull ghcr.io/r0gger/bookmarkly:latest
 ```
 
 ```
 services:
   bookmarkly:
-    image: ghcr.io/r0gger/bookmarkly:main
+    image: ghcr.io/r0gger/bookmarkly:latest
     ports:
       - "80:80"
     volumes:
