@@ -22,6 +22,7 @@ Coming soon...
 ## Features
 
 ### Bookmark Management
+- Responsive design, accessible on both computer and phone.
 - Organize bookmarks into categories
 - Mark bookmarks as favorites
 - Customize each bookmark with its own icon
