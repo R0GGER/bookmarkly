@@ -18,7 +18,6 @@ fi
 
 echo "PHP-FPM is available, starting Apache..."
 
-# Zorg ervoor dat Apache in de voorgrond draait
 source /etc/apache2/envvars
 rm -f /var/run/apache2/apache2.pid
 exec apache2 -DFOREGROUND 
