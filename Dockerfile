@@ -1,6 +1,4 @@
-# Gebruik de officiële PHP 8.2 FPM image als basis
 FROM php:8.2-fpm
-MAINTAINER R0GGER
 
 ARG BOOKMARKLY_VERSION=1.0
 
@@ -14,11 +12,13 @@ RUN apt-get update && apt-get install -y \
 
 RUN a2enmod proxy_fcgi setenvif rewrite
 
-
 RUN curl -L https://bookmarkly.nl/download/bookmarkly_${BOOKMARKLY_VERSION}.zip -o /tmp/bookmarkly.zip \
     && unzip /tmp/bookmarkly.zip -d /var/www/html/ \
     && rm /tmp/bookmarkly.zip \
-    && chown -R www-data:www-data /var/www/html/
+    && chown -R www-data:www-data /var/www/html/ \
+    && chmod -R 755 /var/www/html/ \
+    && mkdir -p /var/www/html/bookmarkly/data \
+    && chmod -R 777 /var/www/html/bookmarkly/data
 
 RUN echo "<VirtualHost *:80>\n\
     DocumentRoot /var/www/html/bookmarkly/public\n\
