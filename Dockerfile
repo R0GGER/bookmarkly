@@ -1,7 +1,7 @@
 # Gebruik de officiële PHP 8.2 FPM image als basis
 FROM php:8.2-fpm
 
-ARG BOOKMARKLY_VERSION=1.3
+ARG BOOKMARKLY_VERSION=1.4
 
 RUN apt-get update && apt-get install -y \
     apache2 \
