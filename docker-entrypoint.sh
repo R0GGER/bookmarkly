@@ -4,20 +4,19 @@ set -e
 # Start PHP-FPM
 php-fpm -D
 
-# Wacht tot PHP-FPM beschikbaar is
 COUNTER=0
 while ! nc -z 127.0.0.1 9000 && [ $COUNTER -lt 30 ]; do
-    echo "Wachten op PHP-FPM... ($COUNTER)"
+    echo "Waiting for PHP-FPM... ($COUNTER)"
     COUNTER=$((COUNTER+1))
     sleep 1
 done
 
 if ! nc -z 127.0.0.1 9000; then
-    echo "PHP-FPM niet beschikbaar na 30 seconden!"
+    echo "PHP-FPM not available after 30 seconds!"
     exit 1
 fi
 
-echo "PHP-FPM is beschikbaar, start Apache..."
+echo "PHP-FPM is available, starting Apache..."
 
 # Zorg ervoor dat Apache in de voorgrond draait
 source /etc/apache2/envvars
