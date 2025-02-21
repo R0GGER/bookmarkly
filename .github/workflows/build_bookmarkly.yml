@@ -2,9 +2,9 @@ name: 'build docker images: PHP8.2 + Apache2 + Bookmarkly'
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "latest" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "latest" ]
 
 env:
   REGISTRY: ghcr.io
