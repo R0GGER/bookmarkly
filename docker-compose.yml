@@ -1,6 +1,6 @@
 services:
   bookmarkly:
-    image: ghcr.io/r0gger/bookmarkly:main
+    image: ghcr.io/r0gger/bookmarkly:latest
     ports:
       - "80:80"
     volumes:
