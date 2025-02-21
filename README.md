@@ -1,7 +1,7 @@
 # bookmarkly
 
 ```bash
-docker pull ghcr.io/r0gger/bookmarkly
+docker pull ghcr.io/r0gger/bookmarkly:main
 ```
 
 ```
