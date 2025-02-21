@@ -7,11 +7,13 @@ docker pull ghcr.io/r0gger/bookmarkly
 ```
 services:
   bookmarkly:
-    image: ghcr.io/r0gger/bookmarkly
+    image: ghcr.io/r0gger/bookmarkly:${BOOKMARKLY_VERSION:-latest}
     ports:
       - "80:80"
     volumes:
       - bookmarkly_data:/var/www/html/bookmarkly/data
+    environment:
+      - BOOKMARKLY_VERSION=1.0 
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/"]
@@ -21,5 +23,5 @@ services:
       start_period: 10s
 
 volumes:
-  bookmarkly_data: 
+  bookmarkly_data:  
 ```
