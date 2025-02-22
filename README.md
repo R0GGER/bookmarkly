@@ -22,7 +22,7 @@ Coming soon...
 ## Features
 
 ### :pushpin: Bookmark Management 
-- Responsive design, accessible on both computer and phone
+- Responsive design for desktop & mobile access
 - Organize bookmarks into categories
 - Mark bookmarks as favorites
 - Customize each bookmark with its own icon
@@ -30,7 +30,7 @@ Coming soon...
 ### :art: Personalization 
 - Multiple themes
 - Customizable background image with brightness and saturation controls
-- Custom CSS support for complete styling control
+- Custom CSS support for styling control
 - Multilingual interface
 
 ### :bulb: Icon System  
@@ -41,7 +41,7 @@ Coming soon...
 ### :closed_lock_with_key: Security
 - Password-protected login system
 - Configurable "Remember me" functionality
-- Optional dashboard protection
+- Optional dashboard protection for extra security 
 
 ### :gear: Administration
 - User-friendly admin interface
