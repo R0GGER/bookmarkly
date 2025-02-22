@@ -21,29 +21,29 @@ Coming soon...
 
 ## Features
 
-### Bookmark Management
+### :pushpin: Bookmark Management 
 - Responsive design, accessible on both computer and phone
 - Organize bookmarks into categories
 - Mark bookmarks as favorites
 - Customize each bookmark with its own icon
 
-### Personalization
-- Multiple themes (light, dark, sepia, ocean, transparent)
+### :art: Personalization 
+- Multiple themes
 - Customizable background image with brightness and saturation controls
 - Custom CSS support for complete styling control
-- Multilingual interface (English and Dutch)
+- Multilingual interface
 
-### Icon System
+### :bulb: Icon System  
 - Integrated icon finder with predefined app icons
 - Automatic favicon extraction from websites
 - Custom icon upload support
 
-### Security
+### :closed_lock_with_key: Security
 - Password-protected login system
 - Configurable "Remember me" functionality
 - Optional dashboard protection
 
-### Administration
+### :gear: Administration
 - User-friendly admin interface
 - Comprehensive settings panel
 - Debug mode for troubleshooting
@@ -76,7 +76,7 @@ Coming soon...
    </Directory>
    ```
 
-4. **Security Recommendations**
+4. :bangbang: **Security Recommendations** :bangbang:
    - Ensure only the `public` directory is web-accessible
    - Store the `data` directory outside the web root if possible
 
@@ -121,15 +121,16 @@ volumes:
 ## First Time Setup
 
 1. **Access the Application**
-   - Visit: `https://your-domain.com/bookmarkly/public`
+   - Visit: `https://your-domain.com` or `http://192.168.1.123` (example)
    - Click the gear icon in the bottom right
 
 2. **Default Credentials**
    - Username: `admin`
    - Password: `password`
 
-3. **Important Security Step**
+3. :bangbang: **Important Security Step** :bangbang:
    - Immediately change the default credentials
+   - Click the gear-icon :gear: (bottom-right)
    - Go to Settings > Change Username / Change Password
 
 ## Important Notes
