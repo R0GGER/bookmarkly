@@ -16,7 +16,7 @@ Coming soon...
 
 ## Screenshots
 ![Frontpage](screenshots/1_frontpage.png)
-[Manage bookmarks](screenshots/2_manage_bookmarks.png) - [Bookmark](screenshots/3_bookmark.png) - [Settings](screenshots/4_settings.png)
+[Manage bookmarks](screenshots/2_manage_bookmarks.png) - [Add Bookmark](screenshots/3_bookmark.png) - [Settings](screenshots/4_settings.png)
    
 
 ## Features
@@ -26,6 +26,7 @@ Coming soon...
 - Organize bookmarks into categories
 - Mark bookmarks as favorites
 - Customize each bookmark with its own icon
+- Backup and Restore (config, credentials, icons)
 
 ### :art: Personalization 
 - Multiple themes
@@ -57,7 +58,7 @@ Coming soon...
 ### Traditional Setup
 
 1. **Download and Upload**
-   - Download Bookmarkly from: https://bookmarkly.nl/download/bookmarkly_webserver_1.5.zip
+   - Download Bookmarkly from: https://bookmarkly.nl/download/bookmarkly_webserver_1.6.zip
    - Upload to your web server (e.g., `/var/www/bookmarkly`)
 
 2. **Set Permissions**
@@ -97,7 +98,7 @@ services:
     volumes:
       - bookmarkly_data:/var/www/html/bookmarkly/data
     environment:
-      - BOOKMARKLY_VERSION=1.5
+      - BOOKMARKLY_VERSION=1.6
     restart: unless-stopped
 
 volumes:
