@@ -124,6 +124,13 @@ return [
         'remember_3m' => '3 maanden',
         'remember_6m' => '6 maanden',
         'remember_me' => 'Onthoud mij',
+        'backup_restore' => 'Backup & Herstel',
+        'export_data' => 'Exporteer Data',
+        'import_data' => 'Importeer Data',
+        'export_description' => 'Download een backup van al je data als ZIP bestand.',
+        'import_description' => 'Herstel je data vanuit een eerder geëxporteerd ZIP bestand.',
+        'import_successful' => 'Data succesvol geïmporteerd. Er is een backup gemaakt van je oude data.',
+        'import_failed' => 'Import mislukt. Controleer of het bestand een geldig backup bestand is.',
     ],
     'en' => [
         'settings' => 'Settings',
@@ -249,5 +256,12 @@ return [
         'remember_3m' => '3 months',
         'remember_6m' => '6 months',
         'remember_me' => 'Remember me',
+        'backup_restore' => 'Backup & Restore',
+        'export_data' => 'Export Data',
+        'import_data' => 'Import Data',
+        'export_description' => 'Download a backup of all your data as a ZIP file.',
+        'import_description' => 'Restore your data from a previously exported ZIP file.',
+        'import_successful' => 'Data imported successfully. A backup of your old data has been created.',
+        'import_failed' => 'Import failed. Please check if the file is a valid backup file.',
     ]
 ]; 

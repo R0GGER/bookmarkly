@@ -142,6 +142,11 @@ class Database {
             $bookmark['favorite_position'] = count($favorites);
         }
         
+        // Converteer het pad naar het relatieve pad voor opslag
+        if (strpos($bookmark['icon'], 'uploads/') === 0) {
+            $bookmark['icon'] = '../data/' . $bookmark['icon'];
+        }
+        
         $newBookmark = array_merge(['id' => uniqid()], $bookmark);
         $this->data['bookmarks'][] = $newBookmark;
         $this->save();
@@ -467,6 +472,11 @@ class Database {
                 $favorites = $this->getFavorites();
                 $updatedBookmark['favorite_position'] = count($favorites);
             }
+        }
+        
+        // Converteer het pad naar het relatieve pad voor opslag
+        if (strpos($updatedBookmark['icon'], 'uploads/') === 0) {
+            $updatedBookmark['icon'] = '../data/' . $updatedBookmark['icon'];
         }
         
         foreach ($bookmarks as $key => $bookmark) {

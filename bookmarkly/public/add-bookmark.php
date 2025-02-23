@@ -487,7 +487,9 @@ $categories = $db->getCategories();
         const selectedIcon = document.getElementById('selectedIcon');
         
         iconInput.value = url;
-        selectedIcon.src = url;
+        selectedIcon.src = url.startsWith('../data/uploads/') 
+            ? 'serve-upload.php?file=' + encodeURIComponent(url.split('/').pop())
+            : url;
         selectedIcon.style.display = 'inline';
         
         closeIconModal();
@@ -588,8 +590,11 @@ $categories = $db->getCategories();
             .then(icons => {
                 const container = document.getElementById('uploadedIcons');
                 container.innerHTML = icons.map(icon => `
-                    <div class="icon-option" onclick="selectIcon('${icon}')">
-                        <img src="${icon}" alt="Uploaded icon" style="width: 32px; height: 32px; object-fit: contain;">
+                    <div class="icon-option" onclick="selectIcon('../data/uploads/${icon}')">
+                        <img src="serve-upload.php?file=${encodeURIComponent(icon)}" 
+                             alt="Uploaded icon" 
+                             style="width: 32px; height: 32px; object-fit: contain;">
+                        <div class="small">${icon.replace(/\.[^/.]+$/, '')}</div>
                     </div>
                 `).join('');
             })
@@ -644,6 +649,21 @@ $categories = $db->getCategories();
 
     // Voeg deze regel toe aan de initialize sectie
     loadUploadedIcons();
+
+    // Update de input event listener
+    document.getElementById('icon').addEventListener('input', function() {
+        const selectedIcon = document.getElementById('selectedIcon');
+        const url = this.value;
+        
+        if (url) {
+            selectedIcon.src = url.startsWith('../data/uploads/') 
+                ? 'serve-upload.php?file=' + encodeURIComponent(url.split('/').pop())
+                : url;
+            selectedIcon.style.display = 'inline';
+        } else {
+            selectedIcon.style.display = 'none';
+        }
+    });
     </script>
 </body>
 </html> 

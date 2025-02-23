@@ -194,7 +194,15 @@ $current_theme = $themes[$settings['theme']] ?? $themes['light'];
                        <?php echo (($bookmark['target_blank'] ?? $settings['target_blank']) === true) ? 'target="_blank"' : ''; ?>>
                         <div class="favorite-icon-wrapper">
                             <div class="favorite-icon">
-                                <img src="<?php echo htmlspecialchars($bookmark['icon']); ?>" alt="">
+                                <?php 
+                                $icon = $bookmark['icon'];
+                                if (strpos($icon, '../data/uploads/') === 0) {
+                                    // Converteer het pad naar de serve-upload route
+                                    $filename = basename($icon);
+                                    $icon = "serve-upload.php?file=" . urlencode($filename);
+                                }
+                                ?>
+                                <img src="<?php echo htmlspecialchars($icon); ?>" alt="">
                             </div>
                         </div>
                         <div class="favorite-content">
@@ -224,7 +232,15 @@ $current_theme = $themes[$settings['theme']] ?? $themes['light'];
                                    <?php echo (($bookmark['target_blank'] ?? $settings['target_blank']) === true) ? 'target="_blank"' : ''; ?>>
                                     <div class="bookmark-icon-wrapper">
                                         <div class="bookmark-icon">
-                                            <img src="<?php echo htmlspecialchars($bookmark['icon']); ?>" alt="">
+                                            <?php 
+                                            $icon = $bookmark['icon'];
+                                            if (strpos($icon, '../data/uploads/') === 0) {
+                                                // Converteer het pad naar de serve-upload route
+                                                $filename = basename($icon);
+                                                $icon = "serve-upload.php?file=" . urlencode($filename);
+                                            }
+                                            ?>
+                                            <img src="<?php echo htmlspecialchars($icon); ?>" alt="">
                                         </div>
                                     </div>
                                     <div class="bookmark-content">

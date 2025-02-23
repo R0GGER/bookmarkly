@@ -48,6 +48,66 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: settings.php');
         exit;
     }
+    if (isset($_POST['export_data'])) {
+        $zip = new ZipArchive();
+        $zipName = 'bookmarkly_backup_' . date('Y-m-d_H-i-s') . '.zip';
+        $zipPath = sys_get_temp_dir() . '/' . $zipName;
+
+        if ($zip->open($zipPath, ZipArchive::CREATE) === TRUE) {
+            // Voeg alle bestanden uit de data map toe
+            $dataFolder = realpath('../data');
+            $files = glob($dataFolder . '/*');
+            
+            foreach ($files as $file) {
+                if (is_file($file)) {
+                    $zip->addFile($file, basename($file));
+                }
+            }
+
+            // Voeg uploads map toe
+            $uploadsFolder = realpath('../data/uploads');
+            if ($uploadsFolder && is_dir($uploadsFolder)) {
+                $uploadFiles = glob($uploadsFolder . '/*');
+                foreach ($uploadFiles as $file) {
+                    if (is_file($file)) {
+                        $zip->addFile($file, 'uploads/' . basename($file));
+                    }
+                }
+            }
+            
+            $zip->close();
+
+            header('Content-Type: application/zip');
+            header('Content-Disposition: attachment; filename="' . $zipName . '"');
+            header('Content-Length: ' . filesize($zipPath));
+            readfile($zipPath);
+            unlink($zipPath);
+            exit;
+        }
+    }
+    if (isset($_FILES['import_data'])) {
+        $zip = new ZipArchive();
+        $uploadedFile = $_FILES['import_data']['tmp_name'];
+        
+        if ($zip->open($uploadedFile) === TRUE) {
+            // Zorg ervoor dat de doelmap bestaat
+            if (!file_exists('../data/uploads')) {
+                mkdir('../data/uploads', 0777, true);
+            }
+
+            // Extract nieuwe bestanden
+            $zip->extractTo('../data');
+            $zip->close();
+
+            $_SESSION['success'] = $lang['import_successful'];
+            header('Location: settings.php');
+            exit;
+        } else {
+            $_SESSION['error'] = $lang['import_failed'];
+            header('Location: settings.php');
+            exit;
+        }
+    }
     $settings = [
         'theme' => $_POST['theme'] ?? 'light',
         'language' => $_POST['language'] ?? 'en',
@@ -555,6 +615,26 @@ $lang = $translations[$current_settings['language'] ?? 'en'];
                 gap: 1rem;
             }
         }
+
+        .backup-restore-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .backup-description {
+            margin-top: 0.5rem;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .backup-restore-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -734,6 +814,36 @@ $lang = $translations[$current_settings['language'] ?? 'en'];
                     <span class="debug-text"><?php echo $lang['debug_mode_description']; ?></span>
                 </label>
             </div>
+
+            <h2><?php echo $lang['backup_restore']; ?></h2>
+            <div class="backup-restore-grid">
+                <div class="form-group">
+                    <form method="POST">
+                        <button type="submit" name="export_data" class="button">
+                            <?php echo $lang['export_data']; ?>
+                        </button>
+                        <p class="backup-description"><?php echo $lang['export_description']; ?></p>
+                    </form>
+                </div>
+                
+                <div class="form-group">
+                    <form method="POST" enctype="multipart/form-data">
+                        <input type="file" 
+                               name="import_data" 
+                               id="import_data" 
+                               accept=".zip"
+                               style="display: none;"
+                               onchange="this.form.submit()">
+                        <button type="button" 
+                                class="button" 
+                                onclick="document.getElementById('import_data').click()">
+                            <?php echo $lang['import_data']; ?>
+                        </button>
+                        <p class="backup-description"><?php echo $lang['import_description']; ?></p>
+                    </form>
+                </div>
+            </div>
+            <hr style="border: 0; border-top: 1px solid #ddd; margin: 2rem 0;">
 
             <button type="submit" class="button"><?php echo $lang['save_settings']; ?></button>
         </form>

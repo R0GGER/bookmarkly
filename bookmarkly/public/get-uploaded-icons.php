@@ -1,17 +1,19 @@
 <?php
-session_start();
+header('Content-Type: application/json');
 
-if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
-    die(json_encode(['error' => 'Not authorized']));
-}
-
-$uploadDir = '../data/uploads/';
+$iconsDir = '../data/uploads/';
 $icons = [];
 
-if (is_dir($uploadDir)) {
-    $files = glob($uploadDir . '*.{jpg,jpeg,png,gif}', GLOB_BRACE);
+if (is_dir($iconsDir)) {
+    $files = scandir($iconsDir);
     foreach ($files as $file) {
-        $icons[] = '../data/uploads/' . basename($file);
+        if ($file !== '.' && $file !== '..' && is_file($iconsDir . $file)) {
+            // Alleen afbeeldingsbestanden toevoegen
+            $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+            if (in_array($extension, ['png', 'jpg', 'jpeg', 'gif', 'svg'])) {
+                $icons[] = $file;
+            }
+        }
     }
 }
 
