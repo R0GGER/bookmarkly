@@ -43,8 +43,6 @@ RUN chmod +x /usr/local/bin/update-bookmarkly.sh \
 COPY bookmarkly /var/www/html/bookmarkly
 
 RUN mkdir -p /var/www/html/bookmarkly/data/uploads/icons && \
-    mkdir -p /var/www/html/bookmarkly/data/users && \
-    mkdir -p /var/www/html/bookmarkly/data/bookmarks && \
     chown -R www-data:www-data /var/www/html/bookmarkly/data && \
     find /var/www/html/bookmarkly/data -type d -exec chmod 777 {} \;
 
