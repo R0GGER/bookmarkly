@@ -87,35 +87,22 @@ Coming soon...
 docker pull ghcr.io/r0gger/bookmarkly:latest
 ```
 
-**Run with Docker**
-```bash
-docker run --name bookmarkly \
-  -d \
-  --restart always \
-  -p 80:80 \
-  -v bookmarkly_data:/var/www/html/bookmarkly/data \
-  ghcr.io/r0gger/bookmarkly:latest
-```
-
 **Docker Compose**
 ```yaml
 services:
   bookmarkly:
-    image: ghcr.io/r0gger/bookmarkly:latest
+    build: .
     ports:
       - "80:80"
     volumes:
       - bookmarkly_data:/var/www/html/bookmarkly/data
+    environment:
+      - BOOKMARKLY_VERSION=1.5
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
 
 volumes:
   bookmarkly_data:
+    driver: local
 ```
 
 ## First Time Setup
