@@ -64,7 +64,7 @@ Coming soon...
    ```bash
    chmod 755 /var/www/bookmarkly
    chmod 777 /var/www/bookmarkly/data    # Database directory
-   chmod 777 /var/www/bookmarkly/uploads # Icon uploads directory
+   chmod 777 /var/www/bookmarkly/uploads/icons # Icon uploads directory
    ```
 
 3. **Configure Web Server**
