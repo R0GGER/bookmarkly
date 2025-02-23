@@ -4,8 +4,10 @@ RUN apt-get update && apt-get install -y \
     unzip \
     curl \
     bc \
+    libzip-dev \
     && rm -rf /var/lib/apt/lists/*
 
+    
 RUN echo '<VirtualHost *:80>\n\
     DocumentRoot /var/www/html/bookmarkly/public\n\
     Alias /data /var/www/html/bookmarkly/data\n\
@@ -35,6 +37,8 @@ session.sid_length = 48\n\
 session.sid_bits_per_character = 6\n\
 output_buffering = 4096" > /usr/local/etc/php/conf.d/custom.ini
 
+RUN docker-php-ext-install zip
+
 COPY update-bookmarkly.sh /usr/local/bin/
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/update-bookmarkly.sh \
@@ -42,7 +46,7 @@ RUN chmod +x /usr/local/bin/update-bookmarkly.sh \
 
 COPY bookmarkly /var/www/html/bookmarkly
 
-RUN mkdir -p /var/www/html/bookmarkly/data/uploads/icons && \
+RUN mkdir -p /var/www/html/bookmarkly/data/uploads && \
     chown -R www-data:www-data /var/www/html/bookmarkly/data && \
     find /var/www/html/bookmarkly/data -type d -exec chmod 777 {} \;
 
@@ -50,5 +54,6 @@ VOLUME ["/var/www/html/bookmarkly/data"]
 
 EXPOSE 80
 
-# Gebruik het nieuwe entrypoint script
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+
+

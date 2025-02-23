@@ -2,7 +2,7 @@
 
 /usr/local/bin/update-bookmarkly.sh
 
-mkdir -p /var/www/html/bookmarkly/data/uploads/icons
+mkdir -p /var/www/html/bookmarkly/data/uploads/
 chown -R www-data:www-data /var/www/html/bookmarkly/
 
 find /var/www/html/bookmarkly/data -type d -exec chmod 777 {} \;
