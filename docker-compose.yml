@@ -12,4 +12,3 @@ services:
 volumes:
   bookmarkly_data:
     driver: local
-
