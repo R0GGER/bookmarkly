@@ -91,7 +91,7 @@ docker pull ghcr.io/r0gger/bookmarkly:latest
 ```yaml
 services:
   bookmarkly:
-    build: .
+    image: ghcr.io/r0gger/bookmarkly:latest
     ports:
       - "80:80"
     volumes:
