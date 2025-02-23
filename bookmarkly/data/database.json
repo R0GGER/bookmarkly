@@ -1,0 +1,23 @@
+{
+    "categories": [
+        {
+            "id": "uncategorised",
+            "name": "Uncategorised",
+            "order": 999,
+            "hidden": true
+        }
+    ],
+    "bookmarks": [],
+    "settings": {
+        "theme": "transparent",
+        "language": "en",
+        "background_image": "bg\/mist.jpg",
+        "background_brightness": "100",
+        "background_saturation": "100",
+        "debug_mode": false,
+        "target_blank": true,
+        "dashboard_title": "BOOKMARKS",
+        "protect_dashboard": false,
+        "remember_duration": "2w"
+    }
+}

@@ -1,0 +1,142 @@
+/* Light Theme */
+[data-theme="light"] {
+    --background: #f0f2f5;
+    --card-bg: #ffffff;
+    --text: #333333;
+    --text-secondary: #666666;
+    --border: #e1e4e8;
+    --shadow: rgba(0,0,0,0.1);
+    --hover: #f8f9fa;
+}
+[data-theme="light"] .favorites-title {
+    color: #333333;
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+    --background: #1a1a1a;
+    --card-bg: #2d2d2d;
+    --text: #e0e0e0;
+    --text-secondary: #a0a0a0;
+    --border: #404040;
+    --shadow: rgba(0,0,0,0.3);
+    --hover: #363636;
+}
+[data-theme="dark"] .favorites-title {
+    color: #a0a0a0;
+}
+
+/* Sepia Theme */
+[data-theme="sepia"] {
+    --background: #f4ecd8;
+    --card-bg: #fcf7eb;
+    --text: #433422;
+    --text-secondary: #7a6555;
+    --border: #d3c4b4;
+    --shadow: rgba(67,52,34,0.1);
+    --hover: #fff9ed;
+}
+[data-theme="sepia"] .favorites-title {
+    color: #433422;
+}
+
+/* Ocean Theme */
+[data-theme="ocean"] {
+    --background: #e3f2fd;
+    --card-bg: #ffffff;
+    --text: #1e3d59;
+    --text-secondary: #476685;
+    --border: #bbdefb;
+    --shadow: rgba(30,61,89,0.1);
+    --hover: #f1f8fe;
+}
+[data-theme="ocean"] .favorites-title {
+    color: #1e3d59;
+}
+
+/* Transparent Theme */
+[data-theme="transparent"] {
+    --background: #000000;
+    --card-bg: rgba(45, 45, 45, 0.27);
+    --text: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.7);
+    --border: transparent;
+    --shadow: rgba(0, 0, 0, 0.2);
+    --hover: rgba(45, 45, 45, 0.4);
+}
+[data-theme="transparent"] .favorites-title {
+    color: #ffffff;
+}
+
+/* Extra styles for transparent theme */
+[data-theme="transparent"] .bookmark-card,
+[data-theme="transparent"] .favorite-card {
+    /*backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);*/
+    border-radius: 6px;
+    background: rgba(45, 45, 45, 0);
+}
+
+[data-theme="transparent"] .favorite-card:hover,
+[data-theme="transparent"] .bookmark-card:hover {
+    transform: translateY(-2px);
+    background: var(--hover);
+    z-index: 2;
+    background: rgba(45, 45, 45, 0);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0);
+}
+
+[data-theme="transparent"] .favorites-section,
+[data-theme="transparent"] .category-column {
+    /*backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);*/
+    box-shadow: 0 0 0 0;
+    background: rgba(115, 115, 115, 0.05);
+    border: 1px solid #4242420f;
+    border-radius: 6px;
+}
+
+/* Theme preview adjustments */
+.theme-option[data-theme="transparent"] .theme-card {
+    --text: #000000;
+    --text-secondary: #333333;
+}
+
+/* Fix voor de thema naam onder de preview */
+.theme-option[data-theme="transparent"] > div:last-child {
+    color: #333333 !important;
+}
+
+/* Common hover effects for all themes */
+.bookmark-card:hover,
+.favorite-card:hover {
+    transform: translateY(-2px);
+    background: var(--hover);
+    z-index: 2;
+    box-shadow: 0 2px 8px var(--shadow);
+}
+
+/* Common transitions for all themes */
+.bookmark-card,
+.favorite-card {
+    transition: all 0.2s ease;
+}
+
+/* Theme-specific adjustments for better contrast */
+[data-theme="dark"] .bookmark-url,
+[data-theme="dark"] .favorite-url {
+    color: var(--text-secondary);
+}
+
+[data-theme="sepia"] .bookmark-url,
+[data-theme="sepia"] .favorite-url {
+    color: var(--text-secondary);
+}
+
+[data-theme="ocean"] .bookmark-url,
+[data-theme="ocean"] .favorite-url {
+    color: var(--text-secondary);
+}
+
+
+

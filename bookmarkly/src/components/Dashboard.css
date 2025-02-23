@@ -1,0 +1,26 @@
+.dashboard {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+/* Responsive grid layout */
+@media (min-width: 640px) {
+  .dashboard {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .dashboard {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .dashboard {
+    grid-template-columns: repeat(4, 1fr);
+  }
+} 
