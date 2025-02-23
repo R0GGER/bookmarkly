@@ -57,7 +57,7 @@ Coming soon...
 ### Traditional Setup
 
 1. **Download and Upload**
-   - Download Bookmarkly from: https://bookmarkly.nl/download/bookmarkly_1.4.zip
+   - Download Bookmarkly from: https://bookmarkly.nl/download/bookmarkly_webserver_1.5.zip
    - Upload to your web server (e.g., `/var/www/bookmarkly`)
 
 2. **Set Permissions**
