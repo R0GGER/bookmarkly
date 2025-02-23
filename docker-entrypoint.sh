@@ -1,23 +1,15 @@
 #!/bin/bash
-set -e
 
-# Start PHP-FPM
-php-fpm -D
+# Update Bookmarkly als er een nieuwe versie beschikbaar is
+/usr/local/bin/update-bookmarkly.sh
 
-COUNTER=0
-while ! nc -z 127.0.0.1 9000 && [ $COUNTER -lt 30 ]; do
-    echo "Waiting for PHP-FPM... ($COUNTER)"
-    COUNTER=$((COUNTER+1))
-    sleep 1
-done
+# Zorg ervoor dat alle benodigde directories bestaan
+mkdir -p /var/www/html/bookmarkly/data/uploads/icons
+chown -R www-data:www-data /var/www/html/bookmarkly/
 
-if ! nc -z 127.0.0.1 9000; then
-    echo "PHP-FPM not available after 30 seconds!"
-    exit 1
-fi
+# Zet de juiste rechten voor alle data directories
+find /var/www/html/bookmarkly/data -type d -exec chmod 777 {} \;
+find /var/www/html/bookmarkly/data -type f -exec chmod 666 {} \;
 
-echo "PHP-FPM is available, starting Apache..."
-
-source /etc/apache2/envvars
-rm -f /var/run/apache2/apache2.pid
-exec apache2 -DFOREGROUND 
+# Start Apache in de voorgrond
+exec apache2-foreground 

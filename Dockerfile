@@ -1,44 +1,31 @@
-# Gebruik de officiële PHP 8.2 FPM image als basis
-FROM php:8.2-fpm
+# Gebruik PHP 8.2 met Apache als base image
+FROM php:8.2-apache
 
-ARG BOOKMARKLY_VERSION=1.4
-
+# Installeer benodigde tools
 RUN apt-get update && apt-get install -y \
-    apache2 \
-    libapache2-mod-fcgid \
     unzip \
     curl \
-    netcat-traditional \
+    bc \
     && rm -rf /var/lib/apt/lists/*
 
-RUN a2enmod proxy_fcgi setenvif rewrite
-
-RUN curl -L https://bookmarkly.nl/download/bookmarkly_${BOOKMARKLY_VERSION}.zip -o /tmp/bookmarkly.zip \
-    && unzip /tmp/bookmarkly.zip -d /var/www/html/ \
-    && rm /tmp/bookmarkly.zip \
-    && chown -R www-data:www-data /var/www/html/ \
-    && chmod -R 755 /var/www/html/ \
-    && mkdir -p /var/www/html/bookmarkly/data \
-    && chmod -R 777 /var/www/html/bookmarkly/data
-
-RUN echo "<VirtualHost *:80>\n\
+# Configureer Apache voor de public directory
+RUN echo '<VirtualHost *:80>\n\
     DocumentRoot /var/www/html/bookmarkly/public\n\
-    \n\
+    Alias /data /var/www/html/bookmarkly/data\n\
     <Directory /var/www/html/bookmarkly/public>\n\
         Options Indexes FollowSymLinks\n\
         AllowOverride All\n\
         Require all granted\n\
     </Directory>\n\
-    \n\
-    <FilesMatch \.php$>\n\
-        SetHandler proxy:fcgi://127.0.0.1:9000\n\
-    </FilesMatch>\n\
-</VirtualHost>" > /etc/apache2/sites-available/000-default.conf
+    <Directory /var/www/html/bookmarkly/data>\n\
+        Options Indexes FollowSymLinks\n\
+        AllowOverride All\n\
+        Require all granted\n\
+    </Directory>\n\
+</VirtualHost>' > /etc/apache2/sites-available/000-default.conf
 
-RUN sed -i 's/listen = \/var\/run\/php-fpm.sock/listen = 127.0.0.1:9000/g' /usr/local/etc/php-fpm.d/www.conf \
-    && sed -i 's/;catch_workers_output = yes/catch_workers_output = yes/g' /usr/local/etc/php-fpm.d/www.conf \
-    && sed -i 's/;php_admin_flag\[log_errors\] = on/php_admin_flag[log_errors] = on/g' /usr/local/etc/php-fpm.d/www.conf \
-    && sed -i 's/;php_admin_value\[error_log\] = .*/php_admin_value[error_log] = \/proc\/self\/fd\/2/g' /usr/local/etc/php-fpm.d/www.conf
+# Activeer Apache modules
+RUN a2enmod rewrite
 
 RUN echo "session.auto_start = 0\n\
 session.use_strict_mode = 1\n\
@@ -52,14 +39,27 @@ session.sid_length = 48\n\
 session.sid_bits_per_character = 6\n\
 output_buffering = 4096" > /usr/local/etc/php/conf.d/custom.ini
 
-RUN mkdir -p /var/run/apache2 \
-    && mkdir -p /var/lock/apache2 \
-    && chown -R www-data:www-data /var/run/apache2 \
-    && chown -R www-data:www-data /var/lock/apache2
-
+# Kopieer de scripts
+COPY update-bookmarkly.sh /usr/local/bin/
 COPY docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/update-bookmarkly.sh \
+    && chmod +x /usr/local/bin/docker-entrypoint.sh
 
+# Kopieer de bookmarkly applicatie
+COPY bookmarkly /var/www/html/bookmarkly
+
+# Stel de juiste permissies in voor de data directory
+RUN mkdir -p /var/www/html/bookmarkly/data/uploads/icons && \
+    mkdir -p /var/www/html/bookmarkly/data/users && \
+    mkdir -p /var/www/html/bookmarkly/data/bookmarks && \
+    chown -R www-data:www-data /var/www/html/bookmarkly/data && \
+    find /var/www/html/bookmarkly/data -type d -exec chmod 777 {} \;
+
+# Definieer het volume voor de data directory
+VOLUME ["/var/www/html/bookmarkly/data"]
+
+# Expose poort 80
 EXPOSE 80
 
-ENTRYPOINT ["docker-entrypoint.sh"]
+# Gebruik het nieuwe entrypoint script
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
