@@ -1,8 +1,8 @@
 services:
   bookmarkly:
-    build: .
+    image: ghcr.io/r0gger/bookmarkly:latest
     ports:
-      - "8888:80"
+      - "80:80"
     volumes:
       - bookmarkly_data:/var/www/html/bookmarkly/data
     environment:
