@@ -105,7 +105,7 @@ volumes:
   bookmarkly_data:
     driver: local
 ```
-**Environment variable - BOOKMARKLY_VERSION**  
+**BOOKMARKLY_VERSION**  
 Current production version: 1.7    
 
 ## First Time Setup
