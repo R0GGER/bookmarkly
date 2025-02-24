@@ -58,7 +58,7 @@ Coming soon...
 ### Traditional Setup
 
 1. **Download and Upload**
-   - Download Bookmarkly from: https://bookmarkly.nl/download/bookmarkly_webserver_1.6.zip
+   - Download Bookmarkly from: https://bookmarkly.nl/download/bookmarkly_webserver_1.7.zip
    - Upload to your web server (e.g., `/var/www/bookmarkly`)
 
 2. **Set Permissions**
@@ -98,13 +98,15 @@ services:
     volumes:
       - bookmarkly_data:/var/www/html/bookmarkly/data
     environment:
-      - BOOKMARKLY_VERSION=1.6
+      - BOOKMARKLY_VERSION=1.7
     restart: unless-stopped
 
 volumes:
   bookmarkly_data:
     driver: local
 ```
+**Environment variable - BOOKMARKLY_VERSION**  
+Current production version: 1.7    
 
 ## First Time Setup
 
