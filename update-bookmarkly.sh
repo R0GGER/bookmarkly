@@ -7,18 +7,18 @@ TEMP_DIR="/tmp"
 APP_DIR="/var/www/html/bookmarkly"
 DATA_DIR="${APP_DIR}/data"
 
-if (( $(echo "$CURRENT_VERSION >= $TARGET_VERSION" | bc -l) )); then
-    echo "Current version ($CURRENT_VERSION) is up to date. Target version: $TARGET_VERSION"
+if (( $(echo "$CURRENT_VERSION >= $BOOKMARKLY_VERSION" | bc -l) )); then
+    echo "Current version ($CURRENT_VERSION) is up to date. Target version: $BOOKMARKLY_VERSION"
     exit 0
 fi
 
 echo "Starting Bookmarkly update process..."
-echo "Updating from version $CURRENT_VERSION to $TARGET_VERSION"
+echo "Updating from version $CURRENT_VERSION to $BOOKMARKLY_VERSION"
 
 TEMP_EXTRACT_DIR=$(mktemp -d)
 cd ${TEMP_DIR}
 
-echo "Downloading Bookmarkly version ${TARGET_VERSION}..."
+echo "Downloading Bookmarkly version ${BOOKMARKLY_VERSION}..."
 curl -L -o bookmarkly.zip ${DOWNLOAD_URL}
 
 if [ $? -ne 0 ]; then
