@@ -420,26 +420,53 @@ class Database {
     }
 
     public function getSettings() {
+        // Standaard instellingen
+        $defaults = [
+            'theme' => 'transparent',
+            'language' => 'en',
+            'background_image' => 'bg/mist.jpg',
+            'background_brightness' => '100',
+            'background_saturation' => '100',
+            'debug_mode' => false,
+            'target_blank' => true,
+            'dashboard_title' => 'BOOKMARKS',
+            'protect_dashboard' => false,
+            'remember_duration' => '2w'
+        ];
+
+        // Als er geen settings zijn, gebruik de defaults
         if (!isset($this->data['settings'])) {
-            $this->data['settings'] = [
-                'theme' => 'transparent',
-                'language' => 'en',
-                'background_image' => 'bg/mist.jpg',
-                'background_brightness' => '100',
-                'background_saturation' => '100',
-                'debug_mode' => false,
-                'target_blank' => true,
-                'dashboard_title' => 'BOOKMARKS',
-                'protect_dashboard' => false,  // Nieuwe instelling
-                'remember_duration' => '2w'    // Nieuwe instelling (2w, 4w, 3m, 6m)
-            ];
+            $this->data['settings'] = $defaults;
         }
-        return $this->data['settings'];
+
+        // Merge met defaults om missende settings aan te vullen
+        return array_merge($defaults, $this->data['settings']);
     }
 
     public function updateSettings($settings) {
-        $this->data['settings'] = array_merge($this->getSettings(), $settings);
-        $this->save();
+        // Haal huidige settings op
+        $current_settings = $this->getSettings();
+        
+        // Update alleen de instellingen die zijn gewijzigd
+        foreach ($settings as $key => $value) {
+            $current_settings[$key] = $value;
+        }
+        
+        // Forceer boolean waarden
+        $current_settings['debug_mode'] = (bool)($settings['debug_mode'] ?? false);
+        $current_settings['target_blank'] = (bool)($settings['target_blank'] ?? true);
+        $current_settings['protect_dashboard'] = (bool)($settings['protect_dashboard'] ?? false);
+        
+        // Sla de geüpdatete settings op
+        $this->data['settings'] = $current_settings;
+        
+        // Debug logging
+        error_log("HUIDIGE SETTINGS: " . print_r($current_settings, true));
+        error_log("NIEUWE SETTINGS: " . print_r($settings, true));
+        error_log("OPGESLAGEN SETTINGS: " . print_r($this->data['settings'], true));
+        
+        // Sla op en return het resultaat
+        return $this->save();
     }
 
     public function getCustomCss() {

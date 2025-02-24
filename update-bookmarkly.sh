@@ -1,8 +1,8 @@
 #!/bin/bash
 
 CURRENT_VERSION=$(cat /var/www/html/bookmarkly/version.txt 2>/dev/null || echo "0.0")
-TARGET_VERSION="${BOOKMARKLY_VERSION:-1.5}"
-DOWNLOAD_URL="https://bookmarkly.nl/download/bookmarkly_update_${TARGET_VERSION}.zip"
+BOOKMARKLY_VERSION="${BOOKMARKLY_VERSION:-1.7}"
+DOWNLOAD_URL="https://bookmarkly.nl/download/bookmarkly_update_${BOOKMARKLY_VERSION}.zip"
 TEMP_DIR="/tmp"
 APP_DIR="/var/www/html/bookmarkly"
 DATA_DIR="${APP_DIR}/data"

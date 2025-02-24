@@ -9,7 +9,7 @@ $db = new Database();
 $settings = $db->getSettings();
 
 // Check of dashboard beveiliging aan staat
-if ($settings['protect_dashboard'] ?? false) {
+if (!empty($settings['protect_dashboard'])) {
     // Check voor remember me cookie
     if (!isset($_SESSION['logged_in']) && isset($_COOKIE['remember_me'])) {
         $_SESSION['logged_in'] = true;
@@ -70,7 +70,7 @@ $current_theme = $themes[$settings['theme']] ?? $themes['light'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bookmarkly - Dashboard</title>
+    <title>Bookmarkly</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/themes.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css">
@@ -95,7 +95,7 @@ $current_theme = $themes[$settings['theme']] ?? $themes['light'];
             z-index: -1;
             background: var(--background);
             <?php if (!empty($settings['background_image'])): ?>
-            background-image: url('<?php echo htmlspecialchars($settings['background_image']); ?>');
+            background-image: url('<?php echo htmlspecialchars($settings['background_image']) . '?v=' . time(); ?>');
             background-size: cover;
             background-attachment: fixed;
             background-position: center;
@@ -169,7 +169,7 @@ $current_theme = $themes[$settings['theme']] ?? $themes['light'];
                 width: 100%;
                 height: 100%;
                 z-index: -1;
-                background-image: url('<?php echo htmlspecialchars($settings['background_image']); ?>');
+                background-image: url('<?php echo htmlspecialchars($settings['background_image']) . '?v=' . time(); ?>');
                 background-size: cover;
                 background-position: center;
                 background-repeat: no-repeat;

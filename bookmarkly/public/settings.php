@@ -13,70 +13,48 @@ $themes = require '../src/config/themes.php';
 $translations = require '../src/config/translations.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['update_credentials'])) {
-        $auth_config = require '../data/auth.php';
-        $current_password = $_POST['current_password'];
-        $new_username = $_POST['new_username'];
-        $new_password = $_POST['new_password'];
-        $confirm_password = $_POST['confirm_password'];
-
-        // Verifieer het huidige wachtwoord
-        if (password_verify($current_password, $auth_config['password'])) {
-            $new_auth = [
-                'username' => $new_username ?: $auth_config['username']
-            ];
-
-            // Update wachtwoord alleen als er een nieuw wachtwoord is ingevoerd
-            if (!empty($new_password)) {
-                if ($new_password === $confirm_password) {
-                    $new_auth['password'] = password_hash($new_password, PASSWORD_DEFAULT);
-                } else {
-                    $_SESSION['error'] = $lang['passwords_dont_match'];
-                    header('Location: settings.php');
-                    exit;
-                }
-            } else {
-                $new_auth['password'] = $auth_config['password'];
-            }
-
-            // Schrijf de nieuwe configuratie naar het bestand
-            file_put_contents('../data/auth.php', "<?php\nreturn " . var_export($new_auth, true) . ";\n");
-            $_SESSION['success'] = $lang['credentials_updated'];
-        } else {
-            $_SESSION['error'] = $lang['invalid_current_password'];
-        }
-        header('Location: settings.php');
-        exit;
-    }
+    // Export data handler
     if (isset($_POST['export_data'])) {
         $zip = new ZipArchive();
         $zipName = 'bookmarkly_backup_' . date('Y-m-d_H-i-s') . '.zip';
         $zipPath = sys_get_temp_dir() . '/' . $zipName;
-
+        
         if ($zip->open($zipPath, ZipArchive::CREATE) === TRUE) {
-            // Voeg alle bestanden uit de data map toe
-            $dataFolder = realpath('../data');
-            $files = glob($dataFolder . '/*');
+            // Voeg database.json toe
+            $zip->addFile($db->file, 'database.json');
             
-            foreach ($files as $file) {
-                if (is_file($file)) {
-                    $zip->addFile($file, basename($file));
-                }
-            }
-
-            // Voeg uploads map toe
-            $uploadsFolder = realpath('../data/uploads');
-            if ($uploadsFolder && is_dir($uploadsFolder)) {
-                $uploadFiles = glob($uploadsFolder . '/*');
-                foreach ($uploadFiles as $file) {
-                    if (is_file($file)) {
-                        $zip->addFile($file, 'uploads/' . basename($file));
+            // Voeg uploads directory toe als deze bestaat
+            $uploadsDir = dirname($db->file) . '/uploads';
+            if (is_dir($uploadsDir)) {
+                $files = new RecursiveIteratorIterator(
+                    new RecursiveDirectoryIterator($uploadsDir),
+                    RecursiveIteratorIterator::LEAVES_ONLY
+                );
+                
+                foreach ($files as $file) {
+                    if (!$file->isDir()) {
+                        $filePath = $file->getRealPath();
+                        $relativePath = 'uploads/' . substr($filePath, strlen($uploadsDir) + 1);
+                        $zip->addFile($filePath, $relativePath);
                     }
                 }
             }
             
+            // Voeg custom CSS toe als het bestaat
+            $cssFile = dirname($db->file) . '/custom.css';
+            if (file_exists($cssFile)) {
+                $zip->addFile($cssFile, 'custom.css');
+            }
+            
+            // Voeg auth.php toe als het bestaat
+            $authFile = dirname($db->file) . '/auth.php';
+            if (file_exists($authFile)) {
+                $zip->addFile($authFile, 'auth.php');
+            }
+            
             $zip->close();
-
+            
+            // Download het ZIP bestand
             header('Content-Type: application/zip');
             header('Content-Disposition: attachment; filename="' . $zipName . '"');
             header('Content-Length: ' . filesize($zipPath));
@@ -85,31 +63,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
     }
+    
+    // Import data handler
     if (isset($_FILES['import_data'])) {
-        $zip = new ZipArchive();
-        $uploadedFile = $_FILES['import_data']['tmp_name'];
-        
-        if ($zip->open($uploadedFile) === TRUE) {
-            // Zorg ervoor dat de doelmap bestaat
-            if (!file_exists('../data/uploads')) {
-                mkdir('../data/uploads', 0777, true);
+        if ($_FILES['import_data']['error'] === UPLOAD_ERR_OK) {
+            $zip = new ZipArchive();
+            if ($zip->open($_FILES['import_data']['tmp_name']) === TRUE) {
+                // Direct alle bestanden extraheren
+                $zip->extractTo(dirname($db->file));
+                $zip->close();
+                
+                // Maak uploads directory als die niet bestaat
+                $uploadsDir = dirname($db->file) . '/uploads';
+                if (!is_dir($uploadsDir)) {
+                    mkdir($uploadsDir, 0775, true);
+                }
+                
+                $_SESSION['success'] = $lang['import_successful'];
+            } else {
+                $_SESSION['error'] = $lang['import_failed'];
             }
-
-            // Extract nieuwe bestanden
-            $zip->extractTo('../data');
-            $zip->close();
-
-            $_SESSION['success'] = $lang['import_successful'];
-            header('Location: settings.php');
-            exit;
         } else {
             $_SESSION['error'] = $lang['import_failed'];
-            header('Location: settings.php');
-            exit;
         }
+        header('Location: settings.php');
+        exit;
     }
+
+    // ... rest van de bestaande POST handlers ...
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_settings'])) {
+    error_log('MAIN SETTINGS FORM SUBMITTED');
+    error_log('POST DATA: ' . print_r($_POST, true));
+    
+    // Verzamel alle settings
     $settings = [
-        'theme' => $_POST['theme'] ?? 'light',
+        'theme' => $_POST['theme'] ?? 'transparent',
         'language' => $_POST['language'] ?? 'en',
         'background_image' => $_POST['background_image'] ?? '',
         'background_brightness' => $_POST['background_brightness'] ?? '100',
@@ -120,13 +110,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'protect_dashboard' => isset($_POST['protect_dashboard']),
         'remember_duration' => $_POST['remember_duration'] ?? '2w'
     ];
-    $db->updateSettings($settings);
-    header('Location: settings.php?saved=1');
-    exit;
+    
+    // Update de settings
+    if ($db->updateSettings($settings)) {
+        error_log('Settings updated successfully');
+        
+        // Redirect naar index als protect_dashboard is ingeschakeld
+        if ($settings['protect_dashboard']) {
+            header('Location: index.php');
+            exit;
+        }
+        
+        // Anders, redirect terug naar settings met success message
+        header('Location: settings.php?saved=1');
+        exit;
+    } else {
+        error_log('Failed to update settings');
+        header('Location: settings.php?error=1');
+        exit;
+    }
 }
 
 $current_settings = $db->getSettings();
-// Voeg default waarden toe voor ontbrekende settings
+error_log('Current settings on page load: ' . print_r($current_settings, true));
+
+// Voeg default waarden toe voor ontbrekende settings, maar behoud bestaande boolean waarden
 $current_settings = array_merge([
     'theme' => 'transparent',
     'language' => 'en',
@@ -150,6 +158,7 @@ $lang = $translations[$current_settings['language'] ?? 'en'];
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bookmarkly - <?php echo $lang['settings']; ?></title>
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
     <style>
 
 
@@ -635,6 +644,50 @@ $lang = $translations[$current_settings['language'] ?? 'en'];
                 gap: 1rem;
             }
         }
+
+        .button.button-green {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .button.button-green:hover {
+            background-color: #218838;
+        }
+
+        .button.button-green .la-check {
+            margin-right: 5px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 4px;
+            display: none;
+            animation: slideIn 0.3s ease-in-out;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .toast.show {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 <body>
@@ -646,7 +699,8 @@ $lang = $translations[$current_settings['language'] ?? 'en'];
             </div>
         </div>
 
-        <form method="POST">
+        <!-- Hoofdformulier voor settings -->
+        <form method="POST" id="settingsForm">
             <h2><?php echo $lang['login_credentials']; ?></h2>
             <button type="button" class="button" onclick="openCredentialsModal()">
                 <?php echo $lang['change_username']; ?> / <?php echo $lang['change_password']; ?>
@@ -659,8 +713,7 @@ $lang = $translations[$current_settings['language'] ?? 'en'];
                             <input type="checkbox" 
                                    name="protect_dashboard" 
                                    class="debug-checkbox" 
-                                   value="1" 
-                                   <?php echo ($current_settings['protect_dashboard'] ?? false) ? 'checked' : ''; ?>>
+                                   <?php echo $current_settings['protect_dashboard'] ? 'checked' : ''; ?>>
                             <div class="debug-text">
                                 <strong><?php echo $lang['protect_dashboard_title']; ?></strong>
                                 <p class="debug-description"><?php echo $lang['protect_dashboard_description']; ?></p>
@@ -718,14 +771,31 @@ $lang = $translations[$current_settings['language'] ?? 'en'];
                 <?php endforeach; ?>
             </div>
 
+            <div class="form-group">
+                <div class="debug-section">
+                    <label class="debug-label">
+                        <input type="checkbox" 
+                               name="target_blank" 
+                               class="debug-checkbox" 
+                               <?php echo ($current_settings['target_blank'] ?? true) ? 'checked' : ''; ?>>
+                        <div class="debug-text">
+                            <strong><?php echo $lang['target_blank_title']; ?></strong>
+                            <p class="debug-description"><?php echo $lang['target_blank_description']; ?></p>
+                        </div>
+                    </label>
+                </div>
+            </div>
             <h2><?php echo $lang['background_image']; ?></h2>
             <div class="form-group">
-                <select name="background_image" class="background-select" onchange="previewBackground(this.value)">
+                <select name="background_image" class="background-select" onchange="previewBackground(this.value + '?v=' + Date.now())">
                     <option value=""><?php echo $lang['no_background']; ?></option>
                     <?php 
+                    clearstatcache();
                     $bg_files = glob('bg/*.{jpg,jpeg,png,gif}', GLOB_BRACE);
+                    
                     foreach ($bg_files as $bg): 
-                        $bg_name = basename($bg, '.jpg');
+                        $bg_name = basename($bg);
+                        $bg_name = pathinfo($bg_name, PATHINFO_FILENAME);
                         $bg_name = ucwords(str_replace(['_', '-'], ' ', $bg_name));
                     ?>
                         <option value="<?php echo htmlspecialchars($bg); ?>"
@@ -737,9 +807,9 @@ $lang = $translations[$current_settings['language'] ?? 'en'];
 
                 <div class="background-settings">
                     <div class="slider-group">
-                        <label for="brightness"><?php echo $lang['background_brightness']; ?></label>
+                        <label for="background_brightness"><?php echo $lang['background_brightness']; ?></label>
                         <input type="range" 
-                               id="brightness" 
+                               id="background_brightness" 
                                name="background_brightness" 
                                class="slider" 
                                min="0" 
@@ -751,9 +821,9 @@ $lang = $translations[$current_settings['language'] ?? 'en'];
                     </div>
 
                     <div class="slider-group">
-                        <label for="saturation"><?php echo $lang['background_saturation']; ?></label>
+                        <label for="background_saturation"><?php echo $lang['background_saturation']; ?></label>
                         <input type="range" 
-                               id="saturation" 
+                               id="background_saturation" 
                                name="background_saturation" 
                                class="slider" 
                                min="0" 
@@ -767,26 +837,10 @@ $lang = $translations[$current_settings['language'] ?? 'en'];
 
                 <div class="background-preview-container">
                     <img id="backgroundPreview" 
-                         src="<?php echo htmlspecialchars($current_settings['background_image']); ?>"
+                         src="<?php echo htmlspecialchars($current_settings['background_image']) . '?v=' . time(); ?>"
                          alt="<?php echo $lang['background_preview_alt']; ?>"
                          style="<?php echo empty($current_settings['background_image']) ? 'display: none;' : ''; ?>
                                 filter: brightness(<?php echo ($current_settings['background_brightness'] ?? '100') / 100; ?>);">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <div class="debug-section">
-                    <label class="debug-label">
-                        <input type="checkbox" 
-                               name="target_blank" 
-                               class="debug-checkbox" 
-                               value="1" 
-                               <?php echo ($current_settings['target_blank'] ?? true) ? 'checked' : ''; ?>>
-                        <div class="debug-text">
-                            <strong><?php echo $lang['target_blank_title']; ?></strong>
-                            <p class="debug-description"><?php echo $lang['target_blank_description']; ?></p>
-                        </div>
-                    </label>
                 </div>
             </div>
 
@@ -814,39 +868,36 @@ $lang = $translations[$current_settings['language'] ?? 'en'];
                     <span class="debug-text"><?php echo $lang['debug_mode_description']; ?></span>
                 </label>
             </div>
-
-            <h2><?php echo $lang['backup_restore']; ?></h2>
-            <div class="backup-restore-grid">
-                <div class="form-group">
-                    <form method="POST">
-                        <button type="submit" name="export_data" class="button">
-                            <?php echo $lang['export_data']; ?>
-                        </button>
-                        <p class="backup-description"><?php echo $lang['export_description']; ?></p>
-                    </form>
-                </div>
-                
-                <div class="form-group">
-                    <form method="POST" enctype="multipart/form-data">
-                        <input type="file" 
-                               name="import_data" 
-                               id="import_data" 
-                               accept=".zip"
-                               style="display: none;"
-                               onchange="this.form.submit()">
-                        <button type="button" 
-                                class="button" 
-                                onclick="document.getElementById('import_data').click()">
-                            <?php echo $lang['import_data']; ?>
-                        </button>
-                        <p class="backup-description"><?php echo $lang['import_description']; ?></p>
-                    </form>
-                </div>
-            </div>
-            <hr style="border: 0; border-top: 1px solid #ddd; margin: 2rem 0;">
-
-            <button type="submit" class="button"><?php echo $lang['save_settings']; ?></button>
         </form>
+
+        <!-- Voor de backup/restore grid, voeg de header toe -->
+        <h2><?php echo $lang['backup_restore']; ?></h2>
+        <div class="backup-restore-grid">
+            <div class="form-group">
+                <form method="POST">
+                    <button type="submit" name="export_data" class="button">
+                        <?php echo $lang['export_data']; ?>
+                    </button>
+                    <p class="backup-description"><?php echo $lang['export_description']; ?></p>
+                </form>
+            </div>
+            
+            <div class="form-group">
+                <form method="POST" enctype="multipart/form-data">
+                    <input type="file" name="import_data" id="import_data" accept=".zip" style="display: none;" onchange="this.form.submit()">
+                    <button type="button" class="button" onclick="document.getElementById('import_data').click()">
+                        <?php echo $lang['import_data']; ?>
+                    </button>
+                    <p class="backup-description"><?php echo $lang['import_description']; ?></p>
+                </form>
+            </div>
+        </div>
+
+        <div style="margin-top: 2rem; text-align: left;">
+            <button type="submit" name="save_settings" form="settingsForm" class="button button-green">
+                <i class="las la-check"></i> <?php echo $lang['save_settings']; ?>
+            </button>
+        </div>
     </div>
 
     <div class="modal" id="credentialsModal">
@@ -901,6 +952,10 @@ $lang = $translations[$current_settings['language'] ?? 'en'];
         </div>
     </div>
 
+    <div id="settingsToast" class="toast">
+        <i class="las la-check"></i> Settings saved successfully
+    </div>
+
     <script>
         // Theme selection
         document.querySelectorAll('.theme-option').forEach(option => {
@@ -916,19 +971,19 @@ $lang = $translations[$current_settings['language'] ?? 'en'];
             valueDisplay.textContent = slider.value + unit;
             
             const preview = document.getElementById('backgroundPreview');
-            const brightnessValue = document.getElementById('brightness').value;
-            const saturationValue = document.getElementById('saturation').value;
+            const brightnessValue = document.getElementById('background_brightness').value;
+            const saturationValue = document.getElementById('background_saturation').value;
             
             preview.style.filter = `brightness(${brightnessValue / 100}) saturate(${saturationValue / 100})`;
         }
 
         function previewBackground(url) {
             const preview = document.getElementById('backgroundPreview');
-            const brightnessValue = document.getElementById('brightness').value;
-            const saturationValue = document.getElementById('saturation').value;
+            const brightnessValue = document.getElementById('background_brightness').value;
+            const saturationValue = document.getElementById('background_saturation').value;
             
             if (url) {
-                preview.src = url;
+                preview.src = url + '?v=' + Date.now();
                 preview.style.display = 'block';
                 preview.style.filter = `brightness(${brightnessValue / 100}) saturate(${saturationValue / 100})`;
             } else {
@@ -936,9 +991,23 @@ $lang = $translations[$current_settings['language'] ?? 'en'];
             }
         }
 
-        // Voeg event listener toe voor saturatie
-        document.getElementById('saturation').addEventListener('input', function() {
+        // Event listeners voor beide sliders
+        document.getElementById('background_brightness').addEventListener('input', function() {
             updateSliderValue(this, '%');
+        });
+
+        document.getElementById('background_saturation').addEventListener('input', function() {
+            updateSliderValue(this, '%');
+        });
+
+        // Initialiseer de preview met de huidige waarden bij het laden van de pagina
+        window.addEventListener('load', function() {
+            const preview = document.getElementById('backgroundPreview');
+            if (preview) {
+                const brightnessValue = document.getElementById('background_brightness').value;
+                const saturationValue = document.getElementById('background_saturation').value;
+                preview.style.filter = `brightness(${brightnessValue / 100}) saturate(${saturationValue / 100})`;
+            }
         });
 
         function openCredentialsModal() {
@@ -961,6 +1030,21 @@ $lang = $translations[$current_settings['language'] ?? 'en'];
         <?php if (isset($_SESSION['error']) || isset($_SESSION['success'])): ?>
         openCredentialsModal();
         <?php endif; ?>
+
+        function showToast() {
+            const toast = document.getElementById('settingsToast');
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000); // Verberg na 3 seconden
+        }
+
+        // Check of er een saved parameter in de URL staat
+        if (new URLSearchParams(window.location.search).has('saved')) {
+            showToast();
+            // Verwijder de saved parameter uit de URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
     </script>
 
     <footer style="text-align: center; padding: 20px; color: #666; font-size: 0.9rem; margin-top: auto;">
