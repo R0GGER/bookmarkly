@@ -6,7 +6,7 @@ services:
     volumes:
       - bookmarkly_data:/var/www/html/bookmarkly/data
     environment:
-      - BOOKMARKLY_VERSION=1.5
+      - BOOKMARKLY_VERSION=1.7
     restart: unless-stopped
 
 volumes:
